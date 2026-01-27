@@ -62,12 +62,6 @@ export class CreateUserDto {
 
   @Expose()
   @IsOptional()
-  @IsString()
-  @Transform(({ value }) => (value ? String(value).trim().toLowerCase() : null))
-  readonly identification?: string;
-
-  @Expose()
-  @IsOptional()
   @IsDateString()
   @Transform(({ value }) => {
     if (typeof value === 'string' && value) {
@@ -86,5 +80,5 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   @Transform(({ value }) => (value ? String(value).trim() : null))
-  readonly otp?: string;
+  otp?: string;
 }

@@ -7,9 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import {
-  UpdateUserDto,
-} from './dto/update-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as firebaseAdmin from 'firebase-admin';
 import { hashedPassword } from 'src/utils/hash-password';
 import { OAuth2Client } from 'google-auth-library';
@@ -45,6 +43,7 @@ export class UserService {
     if (createUserDto.password) {
       hashPassword = await hashedPassword(createUserDto.password);
     }
+    delete createUserDto.otp;
 
     const user = await this.prisma.user.create({
       data: {
@@ -285,7 +284,7 @@ export class UserService {
     const user = await this.prisma.user.findUnique({
       where: {
         id,
-      }
+      },
     });
 
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
@@ -301,7 +300,7 @@ export class UserService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-   // file: Express.Multer.File,
+    // file: Express.Multer.File,
   ) {
     let imageUrl;
     const existingUser = await this.prisma.user.findUnique({
@@ -335,14 +334,14 @@ export class UserService {
     if (updateUserDto.password)
       updateUserDto.password = await hashedPassword(updateUserDto.password);
 
-   // const updateRole = dto['role'] === 'USER' ? 'CUSTOMER' : dto['role'];
+    // const updateRole = dto['role'] === 'USER' ? 'CUSTOMER' : dto['role'];
     const updateUser = await this.prisma.user.update({
       where: { id },
       data: {
         ...updateUserDto,
-       // ...(file ? { photoUrl: imageUrl } : {}),
-       // ...(dto['role'] ? { role: updateRole } : {}),
-      }
+        // ...(file ? { photoUrl: imageUrl } : {}),
+        // ...(dto['role'] ? { role: updateRole } : {}),
+      },
     });
     // await publishEvent(EVENTS.USER_EVENT, {
     //   type: TYPES.UPDATED_USER,
@@ -440,15 +439,14 @@ export class UserService {
   }
 
   async googleRegister(idToken: string) {
-    const client = new OAuth2Client(
+    const client = new OAuth2Client();
     //  envConfig().GOOGLE_ANDROID_CLIENTID
-    );
-   // console.log(envConfig().GOOGLE_ANDROID_CLIENTID, 'client');
+    // console.log(envConfig().GOOGLE_ANDROID_CLIENTID, 'client');
     const ticket = await client.verifyIdToken({
       idToken: idToken,
       audience: [
-       // envConfig().GOOGLE_ANDROID_CLIENTID as string,
-       // envConfig().GOOGLE_IOS_CLIENTID as string,
+        // envConfig().GOOGLE_ANDROID_CLIENTID as string,
+        // envConfig().GOOGLE_IOS_CLIENTID as string,
       ],
     });
     const payload = ticket?.getPayload();
